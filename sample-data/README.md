@@ -17,6 +17,6 @@ npm run crop:b   # crop sample-data/in/B → sample-data/out/B with preset b
 To use this folder as the working directory, run from here with explicit paths:
 
 ```bash
-node ../dist/cli.js batch -s in/A -d out/A -p a
-node ../dist/cli.js batch -s in/B -d out/B -p b
+npx image-content-crop batch -s in/A -d out/A -p a
+npx image-content-crop batch -s in/B -d out/B -p b
 ```

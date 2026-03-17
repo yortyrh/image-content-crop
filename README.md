@@ -65,20 +65,20 @@ presets:
 **With `single` subcommand:**
 
 ```bash
-node dist/cli.js single --source path/to/image.png --dest path/to/out.png
-node dist/cli.js single -s input.png -d output.png
+npx image-content-crop single --source path/to/image.png --dest path/to/out.png
+npx image-content-crop single -s input.png -d output.png
 
 # With a preset from config
-node dist/cli.js single -s input.png -d output.png -p a
+npx image-content-crop single -s input.png -d output.png -p a
 
 # With custom config file
-node dist/cli.js single -s input.png -d output.png -c ./my-crop-config.yaml -p my-preset
+npx image-content-crop single -s input.png -d output.png -c ./my-crop-config.yaml -p my-preset
 ```
 
 **Short form (no subcommand):**
 
 ```bash
-node dist/cli.js --src input.png --out output.png
+npx image-content-crop --src input.png --out output.png
 ```
 
 ### Batch (whole directory)
@@ -87,15 +87,15 @@ Default directories are **`in`** (source) and **`out`** (destination).
 
 ```bash
 # Default: reads from "in", writes to "out"
-node dist/cli.js batch
+npx image-content-crop batch
 
 # Presets A and B (e.g. in/A → out/A, in/B → out/B)
-node dist/cli.js batch -s in/A -d out/A -p a
-node dist/cli.js batch -s in/B -d out/B -p b
+npx image-content-crop batch -s in/A -d out/A -p a
+npx image-content-crop batch -s in/B -d out/B -p b
 
 # Custom dirs and preset
-node dist/cli.js batch --source-dir ./images --dest-dir ./cropped --preset a
-node dist/cli.js batch -s ./images -d ./cropped -p b -c ./crop-config.yaml
+npx image-content-crop batch --source-dir ./images --dest-dir ./cropped --preset a
+npx image-content-crop batch -s ./images -d ./cropped -p b -c ./crop-config.yaml
 ```
 
 **npm scripts** (from project root; they use **sample-data** by default):
@@ -117,7 +117,7 @@ You can override any preset with:
 Example (more crop on right and bottom):
 
 ```bash
-node dist/cli.js single -s page.png -d out.png -r 0.08 -b 0.16
+npx image-content-crop single -s page.png -d out.png -r 0.08 -b 0.16
 ```
 
 ## Expected layout
