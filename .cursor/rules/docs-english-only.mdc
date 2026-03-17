@@ -1,0 +1,11 @@
+---
+description: All documentation must be in English only
+alwaysApply: true
+---
+
+# Documentation language
+
+- **All project documentation must be written in English only.**
+- This includes: README, AGENTS.md, RULE.md, doc comments, user-facing help text, and any other documentation or instructional content added to the project.
+- Do **not** add documentation in French or in any other non-English language.
+- Code identifiers (variables, functions, file names) and commit messages may follow project conventions (e.g. conventional commits); the language rule applies to prose and user-facing documentation.

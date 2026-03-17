@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+
+# Sample data / developer output (contents ignored via .gitignore in each folder)
+# sample-data/in/A, in/B, out/A, out/B directories stay versioned; only their contents are ignored.

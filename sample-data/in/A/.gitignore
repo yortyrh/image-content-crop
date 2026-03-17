@@ -1,0 +1,3 @@
+# Ignore all contents (sample images); keep this directory
+*
+!.gitignore

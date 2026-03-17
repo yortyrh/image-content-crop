@@ -1,0 +1,3 @@
+# Ignore all contents (crop output); keep this directory
+*
+!.gitignore

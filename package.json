@@ -1,0 +1,43 @@
+{
+  "name": "image-content-crop",
+  "version": "1.0.0",
+  "description": "CLI to crop images to content (remove margins). Configurable via YAML presets or CLI options. Usable with npx.",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "image-crop": "./dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yortyrh/image-content-crop.git"
+  },
+  "homepage": "https://github.com/yortyrh/image-content-crop#readme",
+  "bugs": {
+    "url": "https://github.com/yortyrh/image-content-crop/issues"
+  },
+  "scripts": {
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --outfile=dist/cli.js --packages=external",
+    "typecheck": "tsc --noEmit",
+    "crop": "node dist/cli.js",
+    "crop:a": "node dist/cli.js batch -s sample-data/in/A -d sample-data/out/A -p a",
+    "crop:b": "node dist/cli.js batch -s sample-data/in/B -d sample-data/out/B -p b",
+    "prepublishOnly": "npm run build"
+  },
+  "files": ["dist", "crop-config.yaml"],
+  "keywords": ["crop", "image", "cli", "margins", "content"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "sharp": "^0.33.5",
+    "yaml": "^2.8.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

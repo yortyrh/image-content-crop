@@ -1,0 +1,13 @@
+# Image crop presets (margin ratios 0-1, or pixels when marginsInPixels: true)
+# Use --preset <name> to apply a preset; override with -l, -t, -r, -b
+presets:
+  a:
+    marginLeft: 0.10
+    marginRight: 0.10
+    marginBottom: 0.14
+    marginTop: 0
+  b:
+    marginLeft: 0.10
+    marginRight: 0.10
+    marginBottom: 0.10
+    marginTop: 0
