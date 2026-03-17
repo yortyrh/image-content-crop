@@ -1,16 +1,16 @@
-import { readFile, access } from "fs/promises";
-import { homedir } from "os";
-import path from "path";
-import { fileURLToPath } from "url";
-import { parse } from "yaml";
-import type { CropOptions } from "./crop.js";
+import { access, readFile } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parse } from 'yaml';
+import type { CropOptions } from './crop.js';
 
-const DEFAULT_CONFIG_FILENAME = "crop-config.yaml";
+const DEFAULT_CONFIG_FILENAME = 'crop-config.yaml';
 
 /** Directory of the running script (package root when run from dist/cli.js). */
 function getPackageRoot(): string {
   const dir = path.dirname(fileURLToPath(import.meta.url));
-  return path.join(dir, "..");
+  return path.join(dir, '..');
 }
 
 /**
@@ -24,7 +24,7 @@ export async function getConfigPath(explicitPath?: string): Promise<string> {
   if (explicitPath) return path.resolve(explicitPath);
 
   const cwdPath = path.join(process.cwd(), DEFAULT_CONFIG_FILENAME);
-  const homePath = path.join(homedir(), ".config", "image-content-crop", DEFAULT_CONFIG_FILENAME);
+  const homePath = path.join(homedir(), '.config', 'image-content-crop', DEFAULT_CONFIG_FILENAME);
   const defaultPath = path.join(getPackageRoot(), DEFAULT_CONFIG_FILENAME);
 
   const candidates = [cwdPath, homePath, defaultPath];
@@ -32,9 +32,7 @@ export async function getConfigPath(explicitPath?: string): Promise<string> {
     try {
       await access(p);
       return p;
-    } catch {
-      continue;
-    }
+    } catch {}
   }
   return defaultPath;
 }
@@ -48,18 +46,20 @@ export interface CropConfig {
  * Uses getConfigPath() when no path is given: current dir → HOME → project default.
  * Returns an empty object if the file is missing or invalid.
  */
-export async function loadPresets(configPath?: string): Promise<Record<string, Partial<CropOptions>>> {
+export async function loadPresets(
+  configPath?: string,
+): Promise<Record<string, Partial<CropOptions>>> {
   const filePath = await getConfigPath(configPath);
   let content: string;
   try {
-    content = await readFile(filePath, "utf-8");
+    content = await readFile(filePath, 'utf-8');
   } catch {
     return {};
   }
   try {
     const parsed = parse(content) as CropConfig;
     const presets = parsed?.presets;
-    if (!presets || typeof presets !== "object") return {};
+    if (!presets || typeof presets !== 'object') return {};
     return presets as Record<string, Partial<CropOptions>>;
   } catch {
     return {};

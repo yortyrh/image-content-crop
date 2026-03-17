@@ -18,19 +18,35 @@
   "scripts": {
     "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --outfile=dist/cli.js --packages=external",
     "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "test": "vitest",
+    "test:run": "vitest run",
     "crop": "node dist/cli.js",
     "crop:a": "node dist/cli.js batch -s sample-data/in/A -d sample-data/out/A -p a",
     "crop:b": "node dist/cli.js batch -s sample-data/in/B -d sample-data/out/B -p b",
     "prepublishOnly": "npm run build"
   },
-  "files": ["dist", "crop-config.yaml"],
-  "keywords": ["crop", "image", "cli", "margins", "content"],
+  "files": [
+    "dist",
+    "crop-config.yaml"
+  ],
+  "keywords": [
+    "crop",
+    "image",
+    "cli",
+    "margins",
+    "content"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@biomejs/biome": "2.4.7",
     "@types/node": "^22.10.0",
     "esbuild": "^0.24.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "4.1.0"
   },
   "dependencies": {
     "commander": "^12.1.0",

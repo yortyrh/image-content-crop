@@ -1,7 +1,7 @@
-# Publish to npm when a version tag (v* ) is pushed.
+# Continuous Delivery: publish to npm when a version tag (v*) is pushed.
 # Prerequisite: set NPM_TOKEN secret in this repo (npm auth token with publish rights).
 
-name: Publish to npm
+name: CD (Publish to npm)
 
 on:
   push:
@@ -35,6 +35,12 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test:run
 
       - name: Publish to npm
         run: npm publish --provenance --access public

@@ -7,6 +7,13 @@ CLI to crop images to their content area by removing margins. Presets are define
 - Node.js 18+
 - Build once before using: `npm run build`
 
+## Development
+
+- **Lint**: `npm run lint` (Biome)
+- **Format**: `npm run format` or `npm run check` (Biome format + lint with auto-fix)
+- **Unit tests**: `npm run test` (watch) or `npm run test:run` (single run). Test files sit next to the source (e.g. `src/crop.test.ts`).
+- **Typecheck**: `npm run typecheck`
+
 ## Installation
 
 **Local (clone or download):**

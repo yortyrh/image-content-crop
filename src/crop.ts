@@ -1,6 +1,6 @@
-import sharp from "sharp";
-import { mkdir } from "fs/promises";
-import path from "path";
+import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
 
 export interface CropOptions {
   /** Margin to remove from the left (0–1 = ratio, or pixels if > 1). Default 0. */
@@ -35,7 +35,7 @@ function resolveMargin(value: number, dimension: number, inPixels: boolean): num
 export async function cropImage(
   sourcePath: string,
   destPath: string,
-  options: CropOptions = {}
+  options: CropOptions = {},
 ): Promise<void> {
   const opts = { ...defaultCropOptions, ...options };
   const image = sharp(sourcePath);
@@ -58,7 +58,7 @@ export async function cropImage(
 
   if (extractWidth <= 0 || extractHeight <= 0) {
     throw new Error(
-      `Invalid crop region: left=${left} top=${top} right=${right} bottom=${bottom} on ${width}x${height}`
+      `Invalid crop region: left=${left} top=${top} right=${right} bottom=${bottom} on ${width}x${height}`,
     );
   }
 

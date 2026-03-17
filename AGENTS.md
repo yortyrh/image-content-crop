@@ -13,12 +13,17 @@ This project is a **Node.js CLI** that crops images to their content area by rem
 ## Conventions
 
 - **Documentation**: All project documentation (README, AGENTS.md, doc comments, user-facing help) must be **in English only**. Do not add documentation in French or other non-English languages.
-- **Unit tests**: Test files sit next to the file under test; run with `--run` (e.g. `npm test -- --run`).
+- **Lint/format**: Biome (`npm run lint`, `npm run format`, `npm run check`). One config in `biome.json`.
+- **Unit tests**: Vitest; test files sit next to the file under test (e.g. `src/crop.test.ts`). Run with `npm run test:run` or `npm test -- --run`.
 - **Git commits**: Use conventional commits with a title and a description.
 
 ## Commands (from project root)
 
 - `npm run build` — build CLI to `dist/cli.js`
+- `npm run lint` — Biome lint
+- `npm run format` — Biome format
+- `npm run check` — Biome lint + format with auto-fix
+- `npm run test` / `npm run test:run` — Vitest unit tests
 - `npm run crop:a` — batch crop `sample-data/in/A` → `sample-data/out/A` with preset `a`
 - `npm run crop:b` — batch crop `sample-data/in/B` → `sample-data/out/B` with preset `b`
 - `npm run crop` — run CLI (help / ad-hoc usage)
