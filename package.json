@@ -1,6 +1,6 @@
 {
   "name": "image-content-crop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI to crop images to content (remove margins). Configurable via YAML presets or CLI options. Usable with npx.",
   "type": "module",
   "main": "dist/cli.js",
