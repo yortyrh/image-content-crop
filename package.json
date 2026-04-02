@@ -1,7 +1,7 @@
 {
   "name": "image-content-crop",
   "version": "1.1.0",
-  "description": "CLI to crop images to content (remove margins). Configurable via YAML presets or CLI options. Usable with npx.",
+  "description": "AI-powered CLI to batch-process images: crop to content (remove margins), with optional Gemini post-processing. Configurable via YAML presets or CLI options. Usable with npx.",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
