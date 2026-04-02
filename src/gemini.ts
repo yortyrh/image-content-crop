@@ -27,7 +27,11 @@ function resolveHttpTimeoutMs(): number {
   return parsePositiveInt(process.env.GEMINI_HTTP_TIMEOUT_MS, DEFAULT_HTTP_TIMEOUT_MS);
 }
 
-function resolveRetrySettings(): { maxAttempts: number; initialDelayMs: number; maxDelayMs: number } {
+function resolveRetrySettings(): {
+  maxAttempts: number;
+  initialDelayMs: number;
+  maxDelayMs: number;
+} {
   return {
     maxAttempts: parsePositiveInt(process.env.GEMINI_RETRY_MAX_ATTEMPTS, 5),
     initialDelayMs: parsePositiveInt(process.env.GEMINI_RETRY_INITIAL_MS, 1000),

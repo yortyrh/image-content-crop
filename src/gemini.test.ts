@@ -119,7 +119,9 @@ describe('processImageWithGemini', () => {
       .mockRejectedValueOnce(new MockApiError({ message: 'UNAVAILABLE', status: 503 }))
       .mockResolvedValueOnce({
         candidates: [
-          { content: { parts: [{ inlineData: { data: fakeOutputBase64, mimeType: 'image/png' } }] } },
+          {
+            content: { parts: [{ inlineData: { data: fakeOutputBase64, mimeType: 'image/png' } }] },
+          },
         ],
       });
 
@@ -135,7 +137,9 @@ describe('processImageWithGemini', () => {
       .mockRejectedValueOnce(new MockApiError({ message: 'rate limit', status: 429 }))
       .mockResolvedValueOnce({
         candidates: [
-          { content: { parts: [{ inlineData: { data: fakeOutputBase64, mimeType: 'image/png' } }] } },
+          {
+            content: { parts: [{ inlineData: { data: fakeOutputBase64, mimeType: 'image/png' } }] },
+          },
         ],
       });
 
@@ -144,7 +148,9 @@ describe('processImageWithGemini', () => {
   });
 
   it('does not retry on 4xx other than 429', async () => {
-    mockGenerateContent.mockRejectedValue(new MockApiError({ message: 'bad request', status: 400 }));
+    mockGenerateContent.mockRejectedValue(
+      new MockApiError({ message: 'bad request', status: 400 }),
+    );
 
     await expect(processImageWithGemini(Buffer.from('img'), 'image/png', 'edit')).rejects.toThrow();
     expect(mockGenerateContent).toHaveBeenCalledTimes(1);
@@ -153,7 +159,9 @@ describe('processImageWithGemini', () => {
   it('gives up after max retry attempts on 503', async () => {
     process.env.GEMINI_RETRY_INITIAL_MS = '5';
     process.env.GEMINI_RETRY_MAX_ATTEMPTS = '3';
-    mockGenerateContent.mockRejectedValue(new MockApiError({ message: 'UNAVAILABLE', status: 503 }));
+    mockGenerateContent.mockRejectedValue(
+      new MockApiError({ message: 'UNAVAILABLE', status: 503 }),
+    );
 
     await expect(processImageWithGemini(Buffer.from('img'), 'image/png', 'edit')).rejects.toThrow();
     expect(mockGenerateContent).toHaveBeenCalledTimes(3);

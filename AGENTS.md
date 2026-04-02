@@ -1,20 +1,29 @@
 # Agent context: image-content-crop
 
-This project is a **Node.js CLI** that crops images to their content area by removing configurable margins. Presets are defined in YAML; margins can also be set via CLI options.
+This project is a **Node.js CLI** that crops images to their content area by removing configurable margins, with an optional **Gemini-powered post-processing** step (image generation/editing via Google Gemini). Presets are defined in YAML; margins and Gemini prompts can also be set via CLI options.
 
 ## Stack and layout
 
-- **Runtime**: Node.js 18+, ESM.
+- **Runtime**: Node.js 20+, ESM.
 - **Entry**: `src/cli.ts` → built to `dist/cli.js` (esbuild).
-- **Core logic**: `src/crop.ts` (Sharp-based cropping), `src/config.ts` (YAML presets).
-- **Config**: `crop-config.yaml` at project root (or overridden with `--config`).
-- **Sample data**: `sample-data/in/A`, `sample-data/in/B` (inputs) and `sample-data/out/A`, `sample-data/out/B` (outputs). Content of those dirs is gitignored; only the directory structure and local `.gitignore` files are committed.
+- **Core logic**: `src/crop.ts` (Sharp-based cropping), `src/config.ts` (YAML presets), `src/gemini.ts` (optional Gemini post-processing with retry logic).
+- **Config**: `crop-config.yaml` at project root (or overridden with `--config`). A gitignored `crop-config.local.yaml` is resolved first at each lookup location for personal overrides.
+- **Sample data**: `sample-data/in/A`, `sample-data/in/B`, `sample-data/in/sample` (inputs) and `sample-data/out/A`, `sample-data/out/B`, `sample-data/out/sample` (outputs). Content of those dirs is gitignored; only the directory structure and local `.gitignore` files are committed.
+- **Environment**: the CLI loads `dotenv` automatically. A `.env` file at project root is gitignored and used for secrets like `GEMINI_API_KEY`.
+
+## Key dependencies
+
+- **sharp** — image cropping and buffer extraction.
+- **commander** — CLI argument parsing.
+- **yaml** — YAML config parsing.
+- **@google/genai** — Google Gemini API client (optional Gemini post-processing).
+- **dotenv** — loads `.env` file into `process.env`.
 
 ## Conventions
 
 - **Documentation**: All project documentation (README, AGENTS.md, doc comments, user-facing help) must be **in English only**. Do not add documentation in French or other non-English languages.
 - **Lint/format**: Biome (`npm run lint`, `npm run format`, `npm run check`). One config in `biome.json`.
-- **Unit tests**: Vitest; test files sit next to the file under test (e.g. `src/crop.test.ts`). Run with `npm run test:run` or `npm test -- --run`.
+- **Unit tests**: Vitest; test files sit next to the file under test (e.g. `src/crop.test.ts`, `src/gemini.test.ts`). Run with `npm run test:run` or `npm test -- --run`.
 - **Git commits**: Use conventional commits with a title and a description.
 
 ## Commands (from project root)
@@ -24,15 +33,38 @@ This project is a **Node.js CLI** that crops images to their content area by rem
 - `npm run format` — Biome format
 - `npm run check` — Biome lint + format with auto-fix
 - `npm run test` / `npm run test:run` — Vitest unit tests
+- `npm run typecheck` — TypeScript type checking
 - `npm run crop:a` — batch crop `sample-data/in/A` → `sample-data/out/A` with preset `a`
 - `npm run crop:b` — batch crop `sample-data/in/B` → `sample-data/out/B` with preset `b`
+- `npm run crop:sample` — batch crop `sample-data/in/sample` → `sample-data/out/sample` with preset `sample`
 - `npm run crop` — run CLI (help / ad-hoc usage)
+
+## Config resolution
+
+At each location, `crop-config.local.yaml` is checked first, then `crop-config.yaml`:
+
+1. Current directory
+2. `~/.config/image-content-crop/`
+3. Package root (bundled default)
+
+Explicit path via `--config` skips this resolution entirely.
 
 ## Adding features
 
-- New presets: edit `crop-config.yaml` (presets are named arbitrarily, e.g. `a`, `b`).
-- New CLI options: extend `src/cli.ts` (Commander) and pass options through to `cropImage` in `src/crop.ts`.
-- Config resolution order: current dir → `~/.config/image-content-crop/` → bundled default.
+- **New presets**: edit `crop-config.yaml` (presets are named arbitrarily, e.g. `a`, `b`, `sample`). Each preset can optionally include a `gemini` block with `prompt` and `model`.
+- **New CLI options**: extend `src/cli.ts` (Commander) and pass options through to `cropImage` / `cropImageToBuffer` in `src/crop.ts` or `processImageWithGemini` in `src/gemini.ts`.
+- **Gemini integration**: `src/gemini.ts` handles the API call with automatic retry (exponential backoff + jitter on 429/5xx/transient network errors). The `src/cli.ts` resolves Gemini context (enabled/disabled, prompt, model) from preset + CLI flags via `resolveGeminiContext()`.
+
+## Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | *(required for Gemini)* | Google Gemini API key |
+| `GEMINI_HTTP_TIMEOUT_MS` | `300000` (5 min) | HTTP timeout per Gemini request |
+| `GEMINI_RETRY_MAX_ATTEMPTS` | `5` | Maximum retry attempts |
+| `GEMINI_RETRY_INITIAL_MS` | `1000` | Initial backoff delay (ms) |
+| `GEMINI_RETRY_MAX_MS` | `60000` | Maximum backoff delay cap (ms) |
+| `GEMINI_MIN_INTERVAL_MS` | `2000` | Minimum delay between batch Gemini calls (also settable via `--gemini-interval-ms`) |
 
 ## Releasing / deploying to npm (for AI agents)
 
@@ -41,8 +73,8 @@ This project is a **Node.js CLI** that crops images to their content area by rem
 When the user has pushed changes or completed work that might warrant a new release:
 
 1. **Offer to prepare a release**
-   - Ask: “Do you want to deploy a new version to npm?”
-   - If yes, ask: “Which version do you want to assign?” (e.g. suggest next patch/minor/major from current in `package.json`, or accept a specific version like `1.0.2`).
+   - Ask: "Do you want to deploy a new version to npm?"
+   - If yes, ask: "Which version do you want to assign?" (e.g. suggest next patch/minor/major from current in `package.json`, or accept a specific version like `1.0.2`).
 
 2. **Update version**
    - Set the chosen version in `package.json` (`version` field). The tag and this value must match (tag format: `v<version>`, e.g. `v1.0.2`).
