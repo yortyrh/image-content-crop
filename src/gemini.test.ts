@@ -1,13 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockGenerateContent = vi.fn();
-
-vi.mock('@google/genai', () => {
-  class MockGoogleGenAI {
-    models = { generateContent: mockGenerateContent };
+const { mockGenerateContent, MockApiError } = vi.hoisted(() => {
+  class ApiError extends Error {
+    status: number;
+    constructor(options: { message: string; status: number }) {
+      super(options.message);
+      this.name = 'ApiError';
+      this.status = options.status;
+      Object.setPrototypeOf(this, ApiError.prototype);
+    }
   }
-  return { GoogleGenAI: MockGoogleGenAI };
+  return {
+    mockGenerateContent: vi.fn(),
+    MockApiError: ApiError,
+  };
 });
+
+vi.mock('@google/genai', () => ({
+  GoogleGenAI: class MockGoogleGenAI {
+    models = { generateContent: mockGenerateContent };
+  },
+  ApiError: MockApiError,
+}));
 
 import { processImageWithGemini } from './gemini.js';
 
@@ -17,6 +31,8 @@ describe('processImageWithGemini', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.GEMINI_API_KEY = 'test-key';
+    delete process.env.GEMINI_RETRY_INITIAL_MS;
+    delete process.env.GEMINI_RETRY_MAX_ATTEMPTS;
   });
 
   afterEach(() => {
@@ -94,5 +110,52 @@ describe('processImageWithGemini', () => {
     await expect(processImageWithGemini(Buffer.from('img'), 'image/png', 'edit')).rejects.toThrow(
       'did not return an image',
     );
+  });
+
+  it('retries on 503 ApiError then succeeds', async () => {
+    process.env.GEMINI_RETRY_INITIAL_MS = '5';
+    const fakeOutputBase64 = Buffer.from('ok').toString('base64');
+    mockGenerateContent
+      .mockRejectedValueOnce(new MockApiError({ message: 'UNAVAILABLE', status: 503 }))
+      .mockResolvedValueOnce({
+        candidates: [
+          { content: { parts: [{ inlineData: { data: fakeOutputBase64, mimeType: 'image/png' } }] } },
+        ],
+      });
+
+    const result = await processImageWithGemini(Buffer.from('img'), 'image/png', 'edit');
+    expect(result).toEqual(Buffer.from('ok'));
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on 429 then succeeds', async () => {
+    process.env.GEMINI_RETRY_INITIAL_MS = '5';
+    const fakeOutputBase64 = Buffer.from('ok').toString('base64');
+    mockGenerateContent
+      .mockRejectedValueOnce(new MockApiError({ message: 'rate limit', status: 429 }))
+      .mockResolvedValueOnce({
+        candidates: [
+          { content: { parts: [{ inlineData: { data: fakeOutputBase64, mimeType: 'image/png' } }] } },
+        ],
+      });
+
+    await processImageWithGemini(Buffer.from('img'), 'image/png', 'edit');
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry on 4xx other than 429', async () => {
+    mockGenerateContent.mockRejectedValue(new MockApiError({ message: 'bad request', status: 400 }));
+
+    await expect(processImageWithGemini(Buffer.from('img'), 'image/png', 'edit')).rejects.toThrow();
+    expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives up after max retry attempts on 503', async () => {
+    process.env.GEMINI_RETRY_INITIAL_MS = '5';
+    process.env.GEMINI_RETRY_MAX_ATTEMPTS = '3';
+    mockGenerateContent.mockRejectedValue(new MockApiError({ message: 'UNAVAILABLE', status: 503 }));
+
+    await expect(processImageWithGemini(Buffer.from('img'), 'image/png', 'edit')).rejects.toThrow();
+    expect(mockGenerateContent).toHaveBeenCalledTimes(3);
   });
 });

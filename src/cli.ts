@@ -39,6 +39,25 @@ function resolveGeminiContext(
   return { enabled: true, prompt, model };
 }
 
+function sleepMs(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Minimum delay between Gemini calls in batch mode (sequential pacing). */
+function resolveGeminiIntervalMs(cliValue: string | undefined): number {
+  if (cliValue !== undefined && cliValue !== '') {
+    const n = Number.parseInt(cliValue, 10);
+    if (Number.isFinite(n) && n >= 0) return n;
+  }
+  const env = process.env.GEMINI_MIN_INTERVAL_MS;
+  if (env !== undefined && env !== '') {
+    const n = Number.parseInt(env, 10);
+    if (Number.isFinite(n) && n >= 0) return n;
+  }
+  return 2000;
+}
+
 async function processFile(
   src: string,
   dest: string,
@@ -62,7 +81,11 @@ async function processFile(
 function addGeminiOptions(cmd: Command): Command {
   return cmd
     .option('--no-gemini', 'Skip Gemini processing even if the preset configures it')
-    .option('--gemini-prompt <text>', 'Override the Gemini prompt from the preset');
+    .option('--gemini-prompt <text>', 'Override the Gemini prompt from the preset')
+    .option(
+      '--gemini-interval-ms <n>',
+      'Batch only: minimum ms between Gemini API calls (default 2000; env GEMINI_MIN_INTERVAL_MS; 0 disables)',
+    );
 }
 
 const program = new Command();
@@ -187,6 +210,7 @@ addGeminiOptions(batchCmd).action(async (opts) => {
     !opts.gemini,
     opts.geminiPrompt,
   );
+  const geminiIntervalMs = resolveGeminiIntervalMs(opts.geminiIntervalMs);
 
   let files: string[];
   try {
@@ -206,9 +230,16 @@ addGeminiOptions(batchCmd).action(async (opts) => {
 
   const modeLabel = gemini.enabled ? 'crop + Gemini' : 'crop';
   console.log(`${imageFiles.length} image(s) to ${modeLabel}: ${sourceDir} → ${destDir}`);
+  if (gemini.enabled && geminiIntervalMs > 0) {
+    console.log(`  Gemini pacing: ${geminiIntervalMs} ms between API calls (sequential batch).`);
+  }
   let ok = 0;
   let err = 0;
-  for (const file of imageFiles) {
+  for (let i = 0; i < imageFiles.length; i++) {
+    const file = imageFiles[i];
+    if (gemini.enabled && i > 0) {
+      await sleepMs(geminiIntervalMs);
+    }
     const src = path.join(sourceDir, file);
     const dest = path.join(destDir, file);
     try {

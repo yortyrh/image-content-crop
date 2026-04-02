@@ -1,6 +1,16 @@
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
+import type sharp from 'sharp';
+
+type SharpModule = typeof import('sharp');
+let _sharp: SharpModule | null = null;
+
+async function loadSharp(): Promise<SharpModule> {
+  if (!_sharp) {
+    _sharp = (await import('sharp')).default;
+  }
+  return _sharp;
+}
 
 export interface CropOptions {
   /** Margin to remove from the left (0–1 = ratio, or pixels if > 1). Default 0. */
@@ -67,7 +77,8 @@ export async function cropImage(
   destPath: string,
   options: CropOptions = {},
 ): Promise<void> {
-  const image = sharp(sourcePath);
+  const sharpFn = await loadSharp();
+  const image = sharpFn(sourcePath);
   const metadata = await image.metadata();
   const region = buildExtractRegion(sourcePath, metadata, options);
 
@@ -82,7 +93,8 @@ export async function cropImageToBuffer(
   sourcePath: string,
   options: CropOptions = {},
 ): Promise<Buffer> {
-  const image = sharp(sourcePath);
+  const sharpFn = await loadSharp();
+  const image = sharpFn(sourcePath);
   const metadata = await image.metadata();
   const region = buildExtractRegion(sourcePath, metadata, options);
 
