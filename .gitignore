@@ -5,5 +5,8 @@ dist/
 .env
 .env.*
 
+# Local crop config (full prompts / personal tweaks; repo uses crop-config.yaml defaults)
+crop-config.local.yaml
+
 # Sample data / developer output (contents ignored via .gitignore in each folder)
 # sample-data/in/A, in/B, out/A, out/B directories stay versioned; only their contents are ignored.

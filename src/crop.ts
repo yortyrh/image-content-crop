@@ -28,18 +28,12 @@ function resolveMargin(value: number, dimension: number, inPixels: boolean): num
   return Math.floor(dimension * value);
 }
 
-/**
- * Crops an image to the content region by removing margins.
- * Use CropOptions or a preset (from crop-config.yaml) to define margins.
- */
-export async function cropImage(
+function buildExtractRegion(
   sourcePath: string,
-  destPath: string,
-  options: CropOptions = {},
-): Promise<void> {
+  metadata: sharp.Metadata,
+  options: CropOptions,
+): sharp.Region {
   const opts = { ...defaultCropOptions, ...options };
-  const image = sharp(sourcePath);
-  const metadata = await image.metadata();
   const width = metadata.width ?? 0;
   const height = metadata.height ?? 0;
 
@@ -62,13 +56,35 @@ export async function cropImage(
     );
   }
 
+  return { left, top, width: extractWidth, height: extractHeight };
+}
+
+/**
+ * Crop an image and write the result to disk.
+ */
+export async function cropImage(
+  sourcePath: string,
+  destPath: string,
+  options: CropOptions = {},
+): Promise<void> {
+  const image = sharp(sourcePath);
+  const metadata = await image.metadata();
+  const region = buildExtractRegion(sourcePath, metadata, options);
+
   await mkdir(path.dirname(destPath), { recursive: true });
-  await image
-    .extract({
-      left,
-      top,
-      width: extractWidth,
-      height: extractHeight,
-    })
-    .toFile(destPath);
+  await image.extract(region).toFile(destPath);
+}
+
+/**
+ * Crop an image and return the result as a PNG buffer (for piping into Gemini).
+ */
+export async function cropImageToBuffer(
+  sourcePath: string,
+  options: CropOptions = {},
+): Promise<Buffer> {
+  const image = sharp(sourcePath);
+  const metadata = await image.metadata();
+  const region = buildExtractRegion(sourcePath, metadata, options);
+
+  return image.extract(region).png().toBuffer();
 }

@@ -1,5 +1,9 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getConfigPath, loadPresets } from './config.js';
+import { parse } from 'yaml';
+import { type CropConfig, getConfigPath, loadPresets } from './config.js';
 
 const mockAccess = vi.fn();
 const mockReadFile = vi.fn();
@@ -71,5 +75,24 @@ presets:
 
     const presets = await loadPresets(undefined);
     expect(presets).toEqual({});
+  });
+});
+
+describe('crop-config.yaml sample preset', () => {
+  it('Gemini prompt preserves all text and only targets non-text ad elements', () => {
+    const configPath = path.join(
+      path.dirname(fileURLToPath(import.meta.url)),
+      '..',
+      'crop-config.yaml',
+    );
+    const raw = readFileSync(configPath, 'utf-8');
+    const cfg = parse(raw) as CropConfig;
+    const prompt = cfg.presets?.sample?.gemini?.prompt ?? '';
+
+    expect(prompt.length).toBeGreaterThan(50);
+    expect(prompt).toMatch(/written text|wording|copy/i);
+    expect(prompt).toMatch(/non-text|photos|illustrations|graphics|visuals/i);
+    expect(prompt).toMatch(/layout|framing/i);
+    expect(prompt).toMatch(/Do not add|rewrite|watermarks|captions/i);
   });
 });

@@ -1,13 +1,37 @@
 # Image crop presets (margin ratios 0-1, or pixels when marginsInPixels: true)
 # Use --preset <name> to apply a preset; override with -l, -t, -r, -b
+
+# Global Gemini settings (optional).
+# Requires GEMINI_API_KEY env var. Model can be overridden per preset.
+gemini:
+  model: gemini-2.5-flash-image
+
 presets:
   a:
     marginLeft: 0.10
     marginRight: 0.10
     marginBottom: 0.14
     marginTop: 0.12
+    # Per-preset Gemini processing (optional). Sends cropped image + prompt
+    # to Gemini for editing. Use --no-gemini to skip at runtime.
+    # gemini:
+    #   prompt: "Recreate this image with a fresh clean look and brighter colors"
+    #   model: gemini-2.5-flash-image  # optional, overrides global
   b:
     marginLeft: 0.10
     marginRight: 0.10
     marginBottom: 0.10
     marginTop: 0.12
+  sample:
+    marginLeft: 0.10
+    marginRight: 0.10
+    marginBottom: 0.14
+    marginTop: 0.12
+    gemini:
+      prompt: >-
+        Classroom-safe French exam page: leave the top instructions unchanged. In the framed
+        ad, replace photos with different generic scenes of the same activity; replace only
+        names, logos, URLs, phones, emails, and addresses with plausible fictional French
+        values. Keep all other ad copy exactly as in the source—no paraphrasing. Do not add
+        contact fields that are missing in the original. No watermarks; preserve layout.
+      model: gemini-2.5-flash-image

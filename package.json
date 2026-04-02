@@ -25,6 +25,7 @@
     "test:run": "vitest run",
     "crop": "node dist/cli.js",
     "crop:a": "node dist/cli.js batch -s sample-data/in/A -d sample-data/out/A -p a",
+    "crop:sample": "node dist/cli.js batch -s sample-data/in/sample -d sample-data/out/sample -p sample",
     "crop:b": "node dist/cli.js batch -s sample-data/in/B -d sample-data/out/B -p b",
     "prepublishOnly": "npm run build"
   },
@@ -49,11 +50,13 @@
     "vitest": "4.1.0"
   },
   "dependencies": {
+    "@google/genai": "^1.48.0",
     "commander": "^12.1.0",
+    "dotenv": "^17.4.0",
     "sharp": "^0.33.5",
     "yaml": "^2.8.2"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }
