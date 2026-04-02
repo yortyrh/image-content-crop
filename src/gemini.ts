@@ -1,3 +1,5 @@
+import type { ApiErrorInfo } from '@google/genai';
+
 const DEFAULT_MODEL = 'gemini-2.5-flash-image';
 
 /** Default HTTP timeout for image generation (ms). Override with GEMINI_HTTP_TIMEOUT_MS. */
@@ -46,7 +48,10 @@ function backoffDelayMs(attemptIndex: number, initialDelayMs: number, maxDelayMs
   return capped + jitter;
 }
 
-function isRetryableError(err: unknown, ApiErrorClass: new (...args: unknown[]) => Error): boolean {
+function isRetryableError(
+  err: unknown,
+  ApiErrorClass: new (options: ApiErrorInfo) => Error,
+): boolean {
   if (err instanceof ApiErrorClass) {
     const s = (err as { status?: number }).status;
     if (s === 429) return true;
