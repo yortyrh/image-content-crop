@@ -267,3 +267,7 @@ Releases are published to npm automatically via **GitHub Actions** when you push
      git push origin v1.1.0
      ```
    - The **Publish to npm** workflow will run: it typechecks, builds, and publishes to npm. Check the **Actions** tab on GitHub for status.
+
+---
+
+Maintained by [Yorty Ruiz Hernandez](https://yorty.info) · [GitHub](https://github.com/yortyrh) · [LinkedIn](https://www.linkedin.com/in/yorty)
